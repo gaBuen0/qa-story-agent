@@ -1,0 +1,95 @@
+QA STORY AGENT — ONDE PARAMOS
+Atualizado em 31/10/2026
+
+========================================================================
+1. ESTADO ATUAL: PRONTO E FUNCIONANDO
+========================================================================
+
+O agente lê histórias de usuário em Markdown (stories/), gera cenários
+Gherkin em português (features/generated/), preenche o formulário do
+DemoQA pela interface e valida campo a campo, inclusive a tela de
+confirmação.
+
+Última execução completa:
+  - 7/7 cenários passando no navegador (US-001, US-002 e US-003)
+  - 23/23 testes unitários passando
+  - typecheck e stories:check OK
+  - relatório HTML em reports/qa-report.html
+  - JSON de importação do Xray em reports/xray-execution.json
+
+O que existe hoje:
+  - US-001 e US-002: histórias com tabela, interpretadas pelo parser
+    determinístico (sem IA).
+  - US-003: história em texto livre. O .feature foi gerado pelo Claude
+    (Opus 5.5) dentro do Claude Code, sem usar a API nem créditos.
+    Revise o arquivo features/generated/US-003.feature. Decisão a
+    conferir: o gênero "Feminino" foi deduzido de "a aluna".
+  - Relatório HTML próprio, export para o Xray, workflow do GitHub
+    Actions (.github/workflows/qa.yml) e README de portfólio.
+
+Repositório público no GitHub:
+  https://github.com/gaBuen0/qa-story-agent
+Commits com o e-mail noreply do GitHub (o Gmail não fica exposto).
+
+========================================================================
+2. COMO RODAR
+========================================================================
+
+  npm install
+  npx playwright install chromium
+  npm run qa              compila histórias + roda e2e + gera export Xray
+
+Outros comandos:
+  npm run stories:compile   gera/atualiza os .feature
+  npm run stories:check     só confere se os .feature estão atualizados
+  npm run test:e2e          roda os cenários no navegador
+  npm run test:unit         testes unitários
+  npm run typecheck         checagem de tipos
+  npm run xray:export       gera o JSON do Xray (--upload para enviar)
+
+========================================================================
+3. PRÓXIMOS PASSOS (EM ORDEM)
+========================================================================
+
+[ ] 1. Revisar features/generated/US-003.feature.
+
+[x] 2. E-mail dos commits trocado para o noreply do GitHub.
+
+[x] 3. Repositório público criado e projeto enviado (git push).
+
+[x] 4. Badge do README apontando para gaBuen0/qa-story-agent.
+
+[ ] 5. Conferir se o workflow passou na aba Actions do repositório.
+       Para enviar mudanças futuras: git add -A, git commit, git push.
+
+[ ] 6. Opcional: publicar o relatório no GitHub Pages.
+       Settings > Pages > Source: GitHub Actions
+       Settings > Secrets and variables > Actions > Variables:
+         PUBLISH_REPORT = true
+
+[ ] 7. Opcional: testar o envio ao Xray Cloud (nunca testado numa
+       instância real). Secrets: XRAY_CLIENT_ID e XRAY_CLIENT_SECRET.
+
+[ ] 8. Escrever o post do LinkedIn: história do projeto + link do repo.
+
+========================================================================
+4. REGRAS DE CONFIDENCIALIDADE (VALEM PARA REPO E POST)
+========================================================================
+
+Tudo neste repositório é fictício e roda contra o DemoQA (site público
+de prática). Nunca incluir: nome do cliente ou da empresa, plataforma
+usada no trabalho, prints de telas reais, nomes de formulários ou
+campos reais, dados de qualquer tipo, código interno, nomes de colegas
+ou métricas que identifiquem a operação.
+
+========================================================================
+5. SOBRE A IA (CHAVE DA API)
+========================================================================
+
+A chave ANTHROPIC_API_KEY é opcional. Sem ela, histórias em texto livre
+que ainda não têm .feature são puladas com aviso, e o resto funciona.
+As que já têm .feature versionado (como a US-003) são reaproveitadas.
+Para histórias novas em texto livre, há duas opções:
+  - pedir ao Claude Code para gerar o .feature (sem custo extra), ou
+  - colocar a chave num arquivo .env (copie de .env.example) e rodar
+    npm run stories:compile. A API é cobrada à parte da assinatura.

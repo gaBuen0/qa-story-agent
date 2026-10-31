@@ -1,0 +1,34 @@
+{
+  "name": "qa-story-agent",
+  "version": "1.0.0",
+  "description": "Agente de QA que lê histórias de usuário em Markdown, gera cenários BDD, preenche formulários pela interface com Playwright e valida campo a campo.",
+  "private": true,
+  "license": "MIT",
+  "author": "Gabriel Bueno",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "stories:compile": "tsx src/cli/compile-stories.ts",
+    "stories:check": "tsx src/cli/compile-stories.ts --check",
+    "test:e2e": "bddgen && playwright test",
+    "test:unit": "tsx --test \"tests/unit/**/*.test.ts\"",
+    "typecheck": "tsc",
+    "xray:export": "tsx src/cli/xray-export.ts",
+    
+    "qa": "npm run stories:compile && npm run test:e2e && npm run xray:export"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.3.0",
+    "gray-matter": "^4.0.3",
+    "marked": "^18.1.2",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1",
+    "@types/node": "^26.6.6",
+    "playwright-bdd": "^9.2.1",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  }
+}

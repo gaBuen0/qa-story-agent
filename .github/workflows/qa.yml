@@ -1,0 +1,97 @@
+name: QA Story Agent
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    # Roda toda segunda às 9h (UTC) para detectar mudanças no site de prática.
+    - cron: '0 9 * * 1'
+
+concurrency:
+  group: qa-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qa:
+    name: Histórias → BDD → Playwright
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      XRAY_CLIENT_ID: ${{ secrets.XRAY_CLIENT_ID }}
+      XRAY_CLIENT_SECRET: ${{ secrets.XRAY_CLIENT_SECRET }}
+      XRAY_PROJECT_KEY: ${{ vars.XRAY_PROJECT_KEY }}
+      XRAY_TEST_PLAN_KEY: ${{ vars.XRAY_TEST_PLAN_KEY }}
+      XRAY_ENVIRONMENT: github-actions
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Instalar Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Checar tipos
+        run: npm run typecheck
+
+      - name: Testes unitários
+        run: npm run test:unit
+
+      - name: Features em sincronia com as histórias
+        run: npm run stories:check
+
+      - name: Executar cenários no navegador
+        run: npm run test:e2e
+
+      - name: Gerar execução para o Xray
+        if: ${{ !cancelled() }}
+        run: npm run xray:export
+
+      - name: Enviar resultados ao Xray Cloud
+        if: ${{ !cancelled() && env.XRAY_CLIENT_ID != '' }}
+        run: npm run xray:export -- --upload
+
+      - name: Publicar relatórios como artefato
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v5
+        with:
+          name: relatorios-qa
+          path: |
+            reports/
+            test-results/
+          retention-days: 14
+
+      - name: Preparar relatório para o GitHub Pages
+        if: ${{ !cancelled() && github.ref == 'refs/heads/main' && vars.PUBLISH_REPORT == 'true' }}
+        run: |
+          mkdir -p site
+          cp reports/qa-report.html site/index.html
+          cp -r reports/screenshots site/ || true
+
+      - name: Enviar relatório para o GitHub Pages
+        if: ${{ !cancelled() && github.ref == 'refs/heads/main' && vars.PUBLISH_REPORT == 'true' }}
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: site
+
+  pages:
+    name: Publicar relatório
+    needs: qa
+    if: ${{ !cancelled() && github.ref == 'refs/heads/main' && vars.PUBLISH_REPORT == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4
