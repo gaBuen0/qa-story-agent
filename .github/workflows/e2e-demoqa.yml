@@ -44,9 +44,9 @@ jobs:
       XRAY_TEST_PLAN_KEY: ${{ vars.XRAY_TEST_PLAN_KEY }}
       XRAY_ENVIRONMENT: github-actions
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: npm
@@ -70,7 +70,7 @@ jobs:
 
       - name: Publicar relatórios como artefato
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: relatorios-qa
           path: |
@@ -87,7 +87,7 @@ jobs:
 
       - name: Enviar relatório para o GitHub Pages
         if: ${{ !cancelled() && github.ref == 'refs/heads/main' && vars.PUBLISH_REPORT == 'true' }}
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v5
         with:
           path: site
 
@@ -104,4 +104,4 @@ jobs:
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - id: deploy
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
