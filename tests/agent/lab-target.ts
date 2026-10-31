@@ -14,12 +14,20 @@ export type LabDefect =
   | 'nao-envia'
   | 'aceita-invalido';
 
-/** Alvo local, sem internet, declarado do mesmo jeito que o formulário do DemoQA. */
-export function labTarget(...defects: LabDefect[]): FormTarget {
+/** Como a tela confirma o envio: resumo (como o cadastro de estudante) ou linha nova numa tabela (como o Web Tables). */
+export type LabFormat = 'resumo' | 'tabela';
+
+/** Alvo local, sem internet, declarado do mesmo jeito que os formulários do DemoQA. */
+export function labTarget(defects: LabDefect[] = [], format: LabFormat = 'resumo'): FormTarget {
+  const params = new URLSearchParams();
+  if (defects.length) params.set('defeito', defects.join(','));
+  if (format === 'tabela') params.set('formato', 'tabela');
+  const hash = params.toString();
+
   return {
     id: 'formulario-lab',
     name: 'Formulário de laboratório',
-    url: defects.length ? `${PAGE}#defeito=${defects.join(',')}` : PAGE,
+    url: hash ? `${PAGE}#${hash}` : PAGE,
     fields: [
       { key: 'firstName', label: 'Nome', kind: 'text', selector: '#nome', required: true },
       { key: 'lastName', label: 'Sobrenome', kind: 'text', selector: '#sobrenome', required: true },
@@ -37,8 +45,14 @@ export function labTarget(...defects: LabDefect[]): FormTarget {
       { key: 'address', label: 'Endereço', kind: 'textarea', selector: '#endereco' },
     ],
     submitSelector: '#enviar',
-    success: { selector: '#titulo-confirmacao', text: 'Matrícula recebida' },
-    summaryRowsSelector: '#resumo tr',
+    confirmation:
+      format === 'tabela'
+        ? { kind: 'table-row', tableSelector: '#registros', keyColumn: 'E-mail' }
+        : {
+            kind: 'label-value-table',
+            title: { selector: '#titulo-confirmacao', text: 'Matrícula recebida' },
+            rowsSelector: '#resumo tr',
+          },
     summary: [
       { label: 'Nome completo', expected: (v) => `${str(v.firstName)} ${str(v.lastName)}`.trim() },
       { label: 'E-mail', expected: (v) => str(v.email) },

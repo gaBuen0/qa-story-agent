@@ -50,10 +50,21 @@
     <table><tbody id="resumo"></tbody></table>
   </section>
 
+  <!-- Modo "tabela" (#formato=tabela): o envio vira uma linha nova aqui, em vez do resumo acima. -->
+  <table id="registros" hidden>
+    <thead>
+      <tr><th>Nome completo</th><th>E-mail</th><th>Gênero</th><th>Celular</th><th>Hobbies</th><th>Endereço</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Carlos Pereira</td><td>carlos.pereira@example.com</td><td>Masculino</td><td>1199990000</td><td>Música</td><td>Rua Antiga, 10</td></tr>
+    </tbody>
+  </table>
+
   <script>
-    const defeitos = new Set(
-      (new URLSearchParams(location.hash.slice(1)).get('defeito') || '').split(',').filter(Boolean),
-    );
+    const params = new URLSearchParams(location.hash.slice(1));
+    const defeitos = new Set((params.get('defeito') || '').split(',').filter(Boolean));
+    const modoTabela = params.get('formato') === 'tabela';
+    if (modoTabela) document.getElementById('registros').hidden = false;
     const form = document.getElementById('matricula');
     const $ = (id) => document.getElementById(id);
     const marcados = (grupo) =>
@@ -84,6 +95,17 @@
         ['Hobbies', hobbies.join(', ')],
       ];
       if (!defeitos.has('resumo-sem-endereco')) linhas.push(['Endereço', $('endereco').value]);
+
+      if (modoTabela) {
+        const tr = document.createElement('tr');
+        for (const [, valor] of linhas) {
+          const td = document.createElement('td');
+          td.textContent = valor;
+          tr.append(td);
+        }
+        document.querySelector('#registros tbody').append(tr);
+        return;
+      }
 
       $('resumo').replaceChildren(
         ...linhas.map(([rotulo, valor]) => {

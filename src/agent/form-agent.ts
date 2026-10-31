@@ -5,6 +5,7 @@ import { getTarget } from '../targets/registry';
 import type { CanonicalValue, FilledValues, FormTarget } from '../targets/types';
 import { handlers } from './field-handlers';
 import { AGENT_ATTACHMENT, formatFailures, sameValue, type AgentLog, type CheckPhase, type FieldCheck } from './checks';
+import { confirmationHandler } from './confirmations';
 
 const show = (v: CanonicalValue) => (Array.isArray(v) ? v.join(', ') : v);
 
@@ -72,9 +73,7 @@ export class FormAgent {
   async expectSubmitted(): Promise<void> {
     try {
       // Visível, não só presente: há telas que já trazem a confirmação escondida na página.
-      const success = this.page.locator(this.form.success.selector);
-      await expect(success).toBeVisible();
-      await expect(success).toHaveText(this.form.success.text);
+      await expect(this.confirmation()).toBeVisible();
     } catch {
       // Não basta dizer "não enviou": o agente investiga quais campos a tela recusou.
       const invalid: string[] = [];
@@ -99,15 +98,8 @@ export class FormAgent {
 
   /** Compara cada linha do resumo exibido com o que foi preenchido. Coleta tudo antes de falhar. */
   async validateSummary(): Promise<void> {
-    const rows = this.page.locator(this.form.summaryRowsSelector);
-    await expect(rows.first()).toBeVisible();
-    const shown = new Map(
-      (
-        await rows.evaluateAll((trs) =>
-          trs.map((tr) => [tr.children[0]?.textContent?.trim() ?? '', tr.children[1]?.textContent?.trim() ?? '']),
-        )
-      ).map(([label, value]) => [label!, value!]),
-    );
+    const { confirmation } = this.form;
+    const shown = await confirmationHandler(confirmation).read(this.page, confirmation, this.expectedSummary());
 
     for (const row of this.form.summary) {
       const expected = row.expected(this.values);
@@ -121,7 +113,7 @@ export class FormAgent {
   async expectBlocked(): Promise<void> {
     // O envio é síncrono no cliente: se a confirmação não aparece logo, o formulário foi barrado.
     try {
-      await expect(this.page.locator(this.form.success.selector)).toBeHidden({ timeout: 3_000 });
+      await expect(this.confirmation()).toBeHidden({ timeout: 3_000 });
     } catch {
       throw new Error('O formulário foi enviado (a tela de confirmação apareceu), mas a história esperava que fosse bloqueado.');
     }
@@ -151,6 +143,22 @@ export class FormAgent {
         contentType: 'image/png',
       });
     }
+  }
+
+  /** Valores esperados na confirmação, por rótulo (ou coluna). */
+  private expectedSummary(): Map<string, string> {
+    const expected = new Map<string, string>();
+    for (const row of this.form.summary) {
+      const value = row.expected(this.values);
+      if (value !== undefined) expected.set(row.label, value);
+    }
+    return expected;
+  }
+
+  /** O elemento que só aparece quando o envio deu certo. */
+  private confirmation() {
+    const { confirmation } = this.form;
+    return confirmationHandler(confirmation).locate(this.page, confirmation, this.expectedSummary());
   }
 
   private record(phase: CheckPhase, field: string, expected: string, actual: string, match?: 'exact' | 'unordered-list') {

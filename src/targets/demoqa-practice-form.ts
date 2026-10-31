@@ -1,8 +1,6 @@
 import { formatSummaryDate } from './dates';
+import { DEMOQA_BLOCKED_REQUESTS, removeDemoqaBanners, str } from './demoqa-common';
 import type { FilledValues, FormTarget, OptionSpec } from './types';
-
-const str = (v: FilledValues[string] | undefined): string =>
-  v === undefined ? '' : Array.isArray(v) ? v.join(', ') : v;
 
 const fileName = (v: FilledValues[string] | undefined): string => str(v).split(/[\\/]/).pop() ?? '';
 
@@ -35,14 +33,10 @@ export const demoqaPracticeForm: FormTarget = {
   id: 'demoqa-practice-form',
   name: 'Cadastro de estudante (DemoQA)',
   url: 'https://demoqa.com/automation-practice-form',
-  blockRequests:
-    /googlesyndication|doubleclick|adservice|googletagmanager|google-analytics|adplus|ezoic|amazon-adsystem|pubmatic|criteo/,
+  blockRequests: DEMOQA_BLOCKED_REQUESTS,
   afterLoad: async (page) => {
     await page.locator('#firstName').waitFor();
-    // Banners fixos do site cobrem o botão de envio em telas menores.
-    await page.evaluate(() => {
-      document.querySelectorAll('#fixedban, footer, #adplus-anchor, iframe').forEach((el) => el.remove());
-    });
+    await removeDemoqaBanners(page);
   },
 
   fields: [
@@ -96,8 +90,11 @@ export const demoqaPracticeForm: FormTarget = {
   ],
 
   submitSelector: '#submit',
-  success: { selector: '#example-modal-sizes-title-lg', text: 'Thanks for submitting the form' },
-  summaryRowsSelector: '.modal-body tbody tr',
+  confirmation: {
+    kind: 'label-value-table',
+    title: { selector: '#example-modal-sizes-title-lg', text: 'Thanks for submitting the form' },
+    rowsSelector: '.modal-body tbody tr',
+  },
   summary: [
     { label: 'Student Name', expected: (v) => [str(v.firstName), str(v.lastName)].join(' ').trim() },
     { label: 'Student Email', expected: (v) => str(v.email) },

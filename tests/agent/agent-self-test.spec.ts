@@ -8,7 +8,7 @@
 import { expect, test } from '@playwright/test';
 import { FormAgent } from '../../src/agent/form-agent';
 import type { FieldEntry } from '../../src/story/model';
-import { labTarget, type LabDefect } from './lab-target';
+import { labTarget, type LabDefect, type LabFormat } from './lab-target';
 
 const aluna: FieldEntry[] = [
   { field: 'Nome', value: 'Beatriz' },
@@ -27,11 +27,18 @@ const celularCurto: FieldEntry[] = [
   { field: 'Celular', value: '319876' },
 ];
 
-async function agentOn(page: import('@playwright/test').Page, ...defects: LabDefect[]) {
+type Page = import('@playwright/test').Page;
+
+async function openLab(page: Page, format: LabFormat, defects: LabDefect[]) {
   const agent = new FormAgent(page, test.info());
-  await agent.open(labTarget(...defects));
+  await agent.open(labTarget(defects, format));
   return agent;
 }
+
+/** Confirmação em forma de resumo (como o cadastro de estudante). */
+const agentOn = (page: Page, ...defects: LabDefect[]) => openLab(page, 'resumo', defects);
+/** Confirmação como linha nova numa tabela que já tem outro registro (como o Web Tables). */
+const agentOnTable = (page: Page, ...defects: LabDefect[]) => openLab(page, 'tabela', defects);
 
 test.describe('sem defeito: o agente não acusa bug onde não há', () => {
   test('envio com sucesso e resumo conferido campo a campo', async ({ page }) => {
@@ -122,5 +129,40 @@ test.describe('com defeito plantado: o agente precisa acusar', () => {
     await agent.submit();
     await agent.expectBlocked();
     await expect(agent.expectInvalid(['Nome'])).rejects.toThrow('Nome: esperado "inválido", obtido "válido"');
+  });
+});
+
+test.describe('confirmação em tabela: o agente acha a linha certa entre outros registros', () => {
+  test('sem defeito: a linha nova é encontrada e conferida coluna a coluna', async ({ page }) => {
+    const agent = await agentOnTable(page);
+    await agent.fill(aluna);
+    await agent.submit();
+    await agent.expectSubmitted();
+    await agent.validateSummary();
+  });
+
+  test('linha gravada com um dado errado', async ({ page }) => {
+    const agent = await agentOnTable(page, 'resumo-sobrenome-trocado');
+    await agent.fill(aluna);
+    await agent.submit();
+    await agent.expectSubmitted();
+    await expect(agent.validateSummary()).rejects.toThrow(
+      'Nome completo: esperado "Beatriz Ramos", obtido "Beatriz Silva"',
+    );
+  });
+
+  test('nenhuma linha nova: o registro que já existia não conta como envio', async ({ page }) => {
+    const agent = await agentOnTable(page, 'nao-envia');
+    await agent.fill(aluna);
+    await agent.submit();
+    await expect(agent.expectSubmitted()).rejects.toThrow('nenhum campo foi marcado como inválido');
+  });
+
+  test('dado inválido não gera linha nova', async ({ page }) => {
+    const agent = await agentOnTable(page);
+    await agent.fill(celularCurto);
+    await agent.submit();
+    await agent.expectBlocked();
+    await agent.expectInvalid(['Celular']);
   });
 });

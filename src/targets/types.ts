@@ -55,6 +55,25 @@ export interface SummaryRow {
   match?: 'exact' | 'unordered-list';
 }
 
+/**
+ * Como a tela confirma que o envio deu certo e onde mostra os dados gravados.
+ * Suportar um novo formato = escrever um handler em src/agent/confirmations.ts.
+ */
+export type ConfirmationSpec =
+  | {
+      /** Área com um título e uma tabela de pares rótulo | valor (ex.: modal de resumo). */
+      kind: 'label-value-table';
+      title: { selector: string; text: string };
+      rowsSelector: string;
+    }
+  | {
+      /** O registro enviado vira uma linha numa tabela; as colunas são lidas pelo cabeçalho. */
+      kind: 'table-row';
+      tableSelector: string;
+      /** Coluna que identifica a linha nova (ex.: e-mail). Sem esse valor, a linha é achada pelos demais. */
+      keyColumn: string;
+    };
+
 export interface FormTarget {
   id: string;
   name: string;
@@ -65,9 +84,8 @@ export interface FormTarget {
   /** Ajustes depois de carregar a página (ex.: remover banners que cobrem botões). */
   afterLoad?: (page: Page) => Promise<void>;
   submitSelector: string;
-  success: { selector: string; text: string };
-  /** Linhas da tabela de confirmação: 1ª célula = rótulo, 2ª = valor. */
-  summaryRowsSelector: string;
+  confirmation: ConfirmationSpec;
+  /** O que conferir na confirmação: rótulo da linha (ou nome da coluna) e valor esperado. */
   summary: SummaryRow[];
   /** Regras entre campos (ex.: cidade precisa pertencer ao estado). */
   crossValidate?: (values: FilledValues) => string[];
