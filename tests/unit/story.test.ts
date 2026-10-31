@@ -36,7 +36,9 @@ describe('parser de histórias', () => {
 
   it('lê campos inválidos de um cenário bloqueado', () => {
     const s = parseStory(
-      story('## Cenário: X\n\n| Campo | Valor |\n|---|---|\n| Nome | A |\n\n**Resultado esperado:** bloqueado\n**Campos inválidos:** Celular, Gênero\n'),
+      story(
+        '## Cenário: X\n\n| Campo | Valor |\n|---|---|\n| Nome | A |\n\n**Resultado esperado:** bloqueado\n**Campos inválidos:** Celular, Gênero\n',
+      ),
       'US-100.md',
     );
     assert.equal(s.scenarios[0]!.expect, 'blocked');
@@ -45,14 +47,22 @@ describe('parser de histórias', () => {
 
   it('recusa resultado esperado desconhecido', () => {
     assert.throws(
-      () => parseStory(story('## Cenário: X\n\n| Campo | Valor |\n|---|---|\n| Nome | A |\n\n**Resultado esperado:** talvez\n'), 'x.md'),
+      () =>
+        parseStory(
+          story('## Cenário: X\n\n| Campo | Valor |\n|---|---|\n| Nome | A |\n\n**Resultado esperado:** talvez\n'),
+          'x.md',
+        ),
       /não reconhecido/,
     );
   });
 
   it('exige campos inválidos quando o cenário é bloqueado', () => {
     assert.throws(
-      () => parseStory(story('## Cenário: X\n\n| Campo | Valor |\n|---|---|\n| Nome | A |\n\n**Resultado esperado:** bloqueado\n'), 'x.md'),
+      () =>
+        parseStory(
+          story('## Cenário: X\n\n| Campo | Valor |\n|---|---|\n| Nome | A |\n\n**Resultado esperado:** bloqueado\n'),
+          'x.md',
+        ),
       /Campos inválidos/,
     );
   });

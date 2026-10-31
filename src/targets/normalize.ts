@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import type { FieldEntry } from '../story/model';
 import { parseDate } from './dates';
-import { MULTI_VALUE_KINDS, type CanonicalValue, type FieldSpec, type FilledValues, type FormTarget } from './types';
+import { type CanonicalValue, type FieldSpec, type FilledValues, type FormTarget, MULTI_VALUE_KINDS } from './types';
 
 export const FILES_DIR = path.resolve('fixtures/files');
 
@@ -12,7 +12,12 @@ export const isEmptyMarker = (value: string) => EMPTY_MARKERS.has(value.trim().t
 
 /** Comparação tolerante: ignora maiúsculas, acentos e espaços extras. */
 export function fold(text: string): string {
-  return text.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase().replace(/\s+/g, ' ').trim();
+  return text
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 export function findField(target: FormTarget, label: string): FieldSpec | undefined {
@@ -53,7 +58,8 @@ export function normalizeValue(field: FieldSpec, raw: string): CanonicalValue {
     case 'radio-group':
     case 'react-select': {
       const resolved = resolveOption(field, value);
-      if (!resolved) throw new Error(`valor "${value}" inválido para "${field.label}". Opções: ${describeOptions(field)}`);
+      if (!resolved)
+        throw new Error(`valor "${value}" inválido para "${field.label}". Opções: ${describeOptions(field)}`);
       return resolved;
     }
     case 'react-datepicker': {
@@ -86,7 +92,9 @@ export function normalizeEntries(target: FormTarget, entries: FieldEntry[]): Nor
   for (const entry of entries) {
     const field = findField(target, entry.field);
     if (!field) {
-      errors.push(`campo "${entry.field}" não existe em "${target.name}". Campos: ${target.fields.map((f) => f.label).join(', ')}`);
+      errors.push(
+        `campo "${entry.field}" não existe em "${target.name}". Campos: ${target.fields.map((f) => f.label).join(', ')}`,
+      );
       continue;
     }
     if (field.key in values) {

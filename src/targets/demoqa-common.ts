@@ -8,7 +8,9 @@ export const DEMOQA_BLOCKED_REQUESTS =
 /** Banners fixos do site cobrem botões em telas menores. */
 export async function removeDemoqaBanners(page: Page): Promise<void> {
   await page.evaluate(() => {
-    document.querySelectorAll('#fixedban, footer, #adplus-anchor, iframe').forEach((el) => el.remove());
+    document.querySelectorAll('#fixedban, footer, #adplus-anchor, iframe').forEach((el) => {
+      el.remove();
+    });
   });
 }
 

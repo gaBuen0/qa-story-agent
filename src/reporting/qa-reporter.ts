@@ -1,10 +1,19 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import type { FullConfig, FullResult, Reporter, Suite, TestCase, TestResult, TestStep } from '@playwright/test/reporter';
+import type {
+  FullConfig,
+  FullResult,
+  Reporter,
+  Suite,
+  TestCase,
+  TestResult,
+  TestStep,
+} from '@playwright/test/reporter';
 import { AGENT_ATTACHMENT, type AgentLog } from '../agent/checks';
 import { renderHtmlReport } from './html-report';
 import type { RunResult, ScenarioResult, StepResult } from './types';
 
+// biome-ignore lint/suspicious/noControlCharactersInRegex: remove de propósito os códigos de cor (ANSI) das mensagens do Playwright.
 const ANSI = /\x1b\[[0-9;]*m/g;
 const GHERKIN_STEP = /^(Dado|Dada|Quando|Então|Entao|E|Mas)\s/;
 

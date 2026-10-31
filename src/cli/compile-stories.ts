@@ -8,9 +8,9 @@
 import './env';
 import fs from 'node:fs';
 import path from 'node:path';
-import { parseStoryFile } from '../story/markdown-parser';
 import { readSourceHash, writeFeature } from '../story/gherkin-writer';
 import { hasAnthropicCredentials, interpretWithLLM } from '../story/llm-interpreter';
+import { parseStoryFile } from '../story/markdown-parser';
 import type { Story } from '../story/model';
 import { validateScenario } from '../story/validate';
 import { getTarget } from '../targets/registry';
@@ -61,7 +61,9 @@ async function compile(story: Story): Promise<{ outcome: Outcome; detail: string
       return { outcome: 'pulado', detail: 'texto livre exige o LLM (configure ANTHROPIC_API_KEY)', outputFile };
     }
     const result = await interpretWithLLM(story, target, { log: (m) => console.log(c.dim(`    ${m}`)) });
-    feature = writeFeature(story, result.scenarios, { interpreter: `llm (${result.model}) — revise antes de versionar` });
+    feature = writeFeature(story, result.scenarios, {
+      interpreter: `llm (${result.model}) — revise antes de versionar`,
+    });
     detail = `${result.scenarios.length} cenário(s) via ${result.model}, ${result.attempts} tentativa(s)`;
   }
 
@@ -77,7 +79,9 @@ async function main() {
     .readdirSync(STORIES_DIR)
     .filter((f) => f.endsWith('.md'))
     .sort();
-  console.log(`\nCompilando ${files.length} história(s) de ${path.relative(process.cwd(), STORIES_DIR)}/${checkOnly ? ' (modo --check)' : ''}\n`);
+  console.log(
+    `\nCompilando ${files.length} história(s) de ${path.relative(process.cwd(), STORIES_DIR)}/${checkOnly ? ' (modo --check)' : ''}\n`,
+  );
 
   let failures = 0;
   const produced = new Set<string>();

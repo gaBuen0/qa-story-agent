@@ -26,11 +26,13 @@ const textInput: FieldHandler = {
 
 /** Lê os rótulos das opções marcadas dentro de um grupo de radio/checkbox. */
 async function checkedLabels(page: Page, field: FieldSpec): Promise<string[]> {
-  return page.locator(field.selector).evaluate((group) =>
-    [...group.querySelectorAll<HTMLInputElement>('input:checked')].map(
-      (input) => group.querySelector(`label[for="${input.id}"]`)?.textContent?.trim() ?? input.value,
-    ),
-  );
+  return page
+    .locator(field.selector)
+    .evaluate((group) =>
+      [...group.querySelectorAll<HTMLInputElement>('input:checked')].map(
+        (input) => group.querySelector(`label[for="${input.id}"]`)?.textContent?.trim() ?? input.value,
+      ),
+    );
 }
 
 export const handlers: Record<FieldKind, FieldHandler> = {
@@ -85,7 +87,10 @@ export const handlers: Record<FieldKind, FieldHandler> = {
   'react-select': {
     fill: async (page, field, value) => {
       await page.locator(`${field.selector} input`).fill(asText(value));
-      await page.locator('[id^="react-select"][id*="-option-"]', { hasText: asText(value) }).first().click();
+      await page
+        .locator('[id^="react-select"][id*="-option-"]', { hasText: asText(value) })
+        .first()
+        .click();
     },
     read: async (page, field) => {
       const single = page.locator(`${field.selector} [class*="singleValue"]`);

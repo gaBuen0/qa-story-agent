@@ -13,8 +13,10 @@
     "stories:check": "tsx src/cli/compile-stories.ts --check",
     "test:e2e": "bddgen && playwright test",
     "test:unit": "tsx --test \"tests/unit/**/*.test.ts\"",
-    "typecheck": "tsc",
     "test:agent": "playwright test -c playwright.agent.config.ts",
+    "typecheck": "tsc",
+    "lint": "biome check .",
+    "format": "biome check --write .",
     "xray:export": "tsx src/cli/xray-export.ts",
     "qa": "npm run stories:compile && npm run test:e2e && npm run xray:export"
   },
@@ -25,6 +27,7 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.5.15",
     "@playwright/test": "^1.64.1",
     "@types/node": "^26.6.6",
     "playwright-bdd": "^9.2.1",

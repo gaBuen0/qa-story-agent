@@ -118,6 +118,7 @@ Ou tudo de uma vez: `npm run qa`.
 | `npm run test:unit` | Testes unitários do parser, normalização, IA (com cliente simulado) e Xray |
 | `npm run test:agent` | Autotestes do agente contra um formulário local com defeitos plantados (sem internet) |
 | `npm run typecheck` | Checagem de tipos |
+| `npm run lint` / `npm run format` | Lint e formatação com [Biome](https://biomejs.dev) (o `format` corrige o que der) |
 | `npm run xray:export` | Converte os resultados para o formato de importação do Xray (`-- --upload` envia) |
 
 ## Relatórios
@@ -173,7 +174,7 @@ São dois workflows, separados de propósito. O DemoQA é um site público que �
 
 **[`ci.yml`](.github/workflows/ci.yml)** roda em todo push e PR, sem depender de internet:
 
-1. checagem de tipos e testes unitários;
+1. lint e formatação (Biome), checagem de tipos e testes unitários;
 2. `stories:check`, que garante que os `.feature` estão em sincronia com as histórias;
 3. autotestes do agente contra o formulário local com defeitos plantados.
 
@@ -240,6 +241,7 @@ Para testar outro formulário: crie um arquivo em `src/targets/`, registre em `r
 - **IA com rede de proteção.** O modelo só escolhe entre campos e opções que existem (schema com `enum`), a saída passa pela mesma validação determinística, os erros voltam para correção e o resultado é revisado por uma pessoa antes de virar teste.
 - **Interpretação versionada.** O `.feature` gerado pela IA fica no Git. Execuções são reprodutíveis, o CI não depende de chave de API e mudanças na interpretação aparecem num diff.
 - **Gherkin em português.** Quem escreve a história lê o cenário sem traduzir.
+- **Biome no lugar de ESLint + Prettier.** O `typescript-eslint` ainda não suporta o TypeScript 7. O Biome faz lint e formatação numa ferramenta só, sem depender do compilador. A regra contra o operador `!` fica desligada: com `noUncheckedIndexedAccess` ligado, o `!` é a forma explícita de afirmar que o valor existe.
 
 ## Próximos passos
 

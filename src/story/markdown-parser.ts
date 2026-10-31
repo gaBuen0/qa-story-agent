@@ -3,7 +3,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import matter from 'gray-matter';
 import { marked, type Tokens } from 'marked';
-import { StoryError, type ExpectedOutcome, type InterpretationMode, type Narrative, type Scenario, type Story } from './model';
+import {
+  type ExpectedOutcome,
+  type InterpretationMode,
+  type Narrative,
+  type Scenario,
+  type Story,
+  StoryError,
+} from './model';
 
 const SCENARIO_HEADING = /^cen[áa]rio\s*:\s*(.+)$/i;
 const NARRATIVE_LINE = /^\*\*(como|quero|para)\*\*\s+(.+)$/i;

@@ -32,7 +32,9 @@ function scenarioLines(story: Story, scenario: Scenario): string[] {
 
   lines.push(`    Dado que estou no formulário "${story.target}"`);
   lines.push('    Quando preencho o formulário com:');
-  lines.push(...table([['Campo', 'Valor'], ...scenario.fields.map((f) => [escapeCell(f.field), escapeCell(f.value)])], '      '));
+  lines.push(
+    ...table([['Campo', 'Valor'], ...scenario.fields.map((f) => [escapeCell(f.field), escapeCell(f.value)])], '      '),
+  );
   lines.push('    E envio o formulário');
 
   if (scenario.expect === 'submitted') {

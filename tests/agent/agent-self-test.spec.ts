@@ -8,7 +8,7 @@
 import { expect, test } from '@playwright/test';
 import { FormAgent } from '../../src/agent/form-agent';
 import type { FieldEntry } from '../../src/story/model';
-import { labTarget, type LabDefect, type LabFormat } from './lab-target';
+import { type LabDefect, type LabFormat, labTarget } from './lab-target';
 
 const aluna: FieldEntry[] = [
   { field: 'Nome', value: 'Beatriz' },
@@ -82,7 +82,9 @@ test.describe('com defeito plantado: o agente precisa acusar', () => {
     await agent.fill(aluna);
     await agent.submit();
     await agent.expectSubmitted();
-    await expect(agent.validateSummary()).rejects.toThrow('Endereço: esperado "Rua das Palmeiras, 45", obtido "(linha ausente)"');
+    await expect(agent.validateSummary()).rejects.toThrow(
+      'Endereço: esperado "Rua das Palmeiras, 45", obtido "(linha ausente)"',
+    );
   });
 
   test('várias divergências são reportadas juntas, não só a primeira', async ({ page }) => {

@@ -3,8 +3,7 @@ import path from 'node:path';
 import type { CheckPhase, FieldCheck } from '../agent/checks';
 import type { RunResult, ScenarioResult } from './types';
 
-const esc = (s: string) =>
-  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 const seconds = (ms: number) => `${(ms / 1000).toFixed(1)}s`;
 
@@ -25,9 +24,10 @@ const PHASES: { phase: CheckPhase; title: string }[] = [
 function checksTable(checks: FieldCheck[]): string {
   return `<table class="checks"><thead><tr><th>Campo</th><th>Esperado</th><th>Obtido</th><th></th></tr></thead><tbody>${checks
     .map(
-      (c) => `<tr class="${c.passed ? 'ok' : 'bad'}"><td>${esc(c.field)}</td><td><code>${esc(c.expected) || '<span class="muted">(vazio)</span>'}</code></td><td><code>${
-        esc(c.actual) || '<span class="muted">(vazio)</span>'
-      }</code></td><td class="mark">${c.passed ? '✓' : '✗'}</td></tr>`,
+      (c) =>
+        `<tr class="${c.passed ? 'ok' : 'bad'}"><td>${esc(c.field)}</td><td><code>${esc(c.expected) || '<span class="muted">(vazio)</span>'}</code></td><td><code>${
+          esc(c.actual) || '<span class="muted">(vazio)</span>'
+        }</code></td><td class="mark">${c.passed ? '✓' : '✗'}</td></tr>`,
     )
     .join('')}</tbody></table>`;
 }

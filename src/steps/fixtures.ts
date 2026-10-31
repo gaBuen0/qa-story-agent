@@ -1,4 +1,4 @@
-import { createBdd, test as base } from 'playwright-bdd';
+import { test as base, createBdd } from 'playwright-bdd';
 import { FormAgent } from '../agent/form-agent';
 
 export const test = base.extend<{ agent: FormAgent }>({

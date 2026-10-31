@@ -120,7 +120,9 @@ export async function interpretWithLLM(story: Story, target: FormTarget, options
     });
 
     if (response.stop_reason === 'refusal') {
-      throw new Error(`O modelo recusou interpretar ${story.id}: ${response.stop_details?.explanation ?? 'sem detalhes'}`);
+      throw new Error(
+        `O modelo recusou interpretar ${story.id}: ${response.stop_details?.explanation ?? 'sem detalhes'}`,
+      );
     }
     if (response.stop_reason === 'max_tokens') {
       throw new Error(`Resposta truncada ao interpretar ${story.id} (max_tokens).`);
@@ -144,7 +146,9 @@ export async function interpretWithLLM(story: Story, target: FormTarget, options
 
     log(`tentativa ${attempt}: ${errors.length} problema(s) na saída do modelo`);
     if (attempt === maxAttempts) {
-      throw new Error(`Cenários gerados para ${story.id} continuam inválidos após ${maxAttempts} tentativas:\n- ${errors.join('\n- ')}`);
+      throw new Error(
+        `Cenários gerados para ${story.id} continuam inválidos após ${maxAttempts} tentativas:\n- ${errors.join('\n- ')}`,
+      );
     }
     // Conversa só cresce (append-only): devolvemos a resposta e pedimos a correção.
     messages.push({ role: 'assistant', content: response.content });

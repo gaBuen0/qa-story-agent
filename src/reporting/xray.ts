@@ -60,7 +60,10 @@ const STATUS: Record<ScenarioResult['status'], XrayTest['status']> = {
 function comment(s: ScenarioResult): string {
   const checks = s.log?.checks ?? [];
   const failed = checks.filter((c) => !c.passed);
-  const lines = [`Cenário: ${s.scenario}`, `Verificações de campo: ${checks.length - failed.length}/${checks.length} ok`];
+  const lines = [
+    `Cenário: ${s.scenario}`,
+    `Verificações de campo: ${checks.length - failed.length}/${checks.length} ok`,
+  ];
   if (failed.length) {
     lines.push('', 'Divergências:');
     for (const c of failed) lines.push(`- [${c.phase}] ${c.field}: esperado "${c.expected}", obtido "${c.actual}"`);

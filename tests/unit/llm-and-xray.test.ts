@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
 import path from 'node:path';
 import { describe, it } from 'node:test';
-import { interpretWithLLM, type LlmClient } from '../../src/story/llm-interpreter';
-import { parseStoryFile } from '../../src/story/markdown-parser';
 import type { RunResult } from '../../src/reporting/types';
 import { toXrayExecution } from '../../src/reporting/xray';
+import { interpretWithLLM, type LlmClient } from '../../src/story/llm-interpreter';
+import { parseStoryFile } from '../../src/story/markdown-parser';
 import { getTarget } from '../../src/targets/registry';
 
 const target = getTarget('demoqa-practice-form');
@@ -89,17 +89,37 @@ describe('exportação para o Xray', () => {
     status: 'failed',
     scenarios: [
       {
-        id: '1', storyId: 'US-001', feature: 'US-001 · Cadastro', scenario: 'Completo',
-        tags: ['@US-001', '@smoke', '@TEST_QA-101', '@REQ_QA-10'], xrayTestKey: 'QA-101', requirementKey: 'QA-10',
-        status: 'passed', flaky: false, retries: 0, startTime: '2026-10-30T10:00:00.000Z', durationMs: 5000, steps: [],
+        id: '1',
+        storyId: 'US-001',
+        feature: 'US-001 · Cadastro',
+        scenario: 'Completo',
+        tags: ['@US-001', '@smoke', '@TEST_QA-101', '@REQ_QA-10'],
+        xrayTestKey: 'QA-101',
+        requirementKey: 'QA-10',
+        status: 'passed',
+        flaky: false,
+        retries: 0,
+        startTime: '2026-10-30T10:00:00.000Z',
+        durationMs: 5000,
+        steps: [],
       },
       {
-        id: '2', storyId: 'US-002', feature: 'US-002 · Validações', scenario: 'Celular curto',
-        tags: ['@US-002', '@negativo', '@REQ_QA-11'], requirementKey: 'QA-11',
-        status: 'failed', flaky: false, retries: 0, startTime: '2026-10-30T10:00:10.000Z', durationMs: 3000, steps: [],
+        id: '2',
+        storyId: 'US-002',
+        feature: 'US-002 · Validações',
+        scenario: 'Celular curto',
+        tags: ['@US-002', '@negativo', '@REQ_QA-11'],
+        requirementKey: 'QA-11',
+        status: 'failed',
+        flaky: false,
+        retries: 0,
+        startTime: '2026-10-30T10:00:10.000Z',
+        durationMs: 3000,
+        steps: [],
         error: 'O formulário foi enviado...\nstack',
         log: {
-          target: 'demoqa-practice-form', actions: [],
+          target: 'demoqa-practice-form',
+          actions: [],
           checks: [{ phase: 'validação', field: 'Celular', expected: 'inválido', actual: 'válido', passed: false }],
         },
       },

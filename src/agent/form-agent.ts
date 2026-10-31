@@ -3,9 +3,9 @@ import type { FieldEntry } from '../story/model';
 import { normalizeEntries, resolveFieldLabels } from '../targets/normalize';
 import { getTarget } from '../targets/registry';
 import type { CanonicalValue, FilledValues, FormTarget } from '../targets/types';
-import { handlers } from './field-handlers';
-import { AGENT_ATTACHMENT, formatFailures, sameValue, type AgentLog, type CheckPhase, type FieldCheck } from './checks';
+import { AGENT_ATTACHMENT, type AgentLog, type CheckPhase, type FieldCheck, formatFailures, sameValue } from './checks';
 import { confirmationHandler } from './confirmations';
+import { handlers } from './field-handlers';
 
 const show = (v: CanonicalValue) => (Array.isArray(v) ? v.join(', ') : v);
 
@@ -35,7 +35,9 @@ export class FormAgent {
     this.log.target = this.target.id;
     const blocked = this.target.blockRequests;
     if (blocked) {
-      await this.page.route('**/*', (route) => (blocked.test(route.request().url()) ? route.abort() : route.continue()));
+      await this.page.route('**/*', (route) =>
+        blocked.test(route.request().url()) ? route.abort() : route.continue(),
+      );
     }
     await this.page.goto(this.target.url, { waitUntil: 'domcontentloaded' });
     await this.target.afterLoad?.(this.page);
@@ -115,7 +117,9 @@ export class FormAgent {
     try {
       await expect(this.confirmation()).toBeHidden({ timeout: 3_000 });
     } catch {
-      throw new Error('O formulário foi enviado (a tela de confirmação apareceu), mas a história esperava que fosse bloqueado.');
+      throw new Error(
+        'O formulário foi enviado (a tela de confirmação apareceu), mas a história esperava que fosse bloqueado.',
+      );
     }
   }
 
@@ -161,7 +165,13 @@ export class FormAgent {
     return confirmationHandler(confirmation).locate(this.page, confirmation, this.expectedSummary());
   }
 
-  private record(phase: CheckPhase, field: string, expected: string, actual: string, match?: 'exact' | 'unordered-list') {
+  private record(
+    phase: CheckPhase,
+    field: string,
+    expected: string,
+    actual: string,
+    match?: 'exact' | 'unordered-list',
+  ) {
     const check: FieldCheck = { phase, field, expected, actual, passed: sameValue(expected, actual, match) };
     this.log.checks.push(check);
   }
