@@ -44,6 +44,9 @@ jobs:
       - name: Testes unitários
         run: npm run test:unit
 
+      - name: Autotestes do agente (defeitos plantados)
+        run: npm run test:agent
+
       - name: Features em sincronia com as histórias
         run: npm run stories:check
 

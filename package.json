@@ -14,8 +14,8 @@
     "test:e2e": "bddgen && playwright test",
     "test:unit": "tsx --test \"tests/unit/**/*.test.ts\"",
     "typecheck": "tsc",
+    "test:agent": "playwright test -c playwright.agent.config.ts",
     "xray:export": "tsx src/cli/xray-export.ts",
-    
     "qa": "npm run stories:compile && npm run test:e2e && npm run xray:export"
   },
   "dependencies": {

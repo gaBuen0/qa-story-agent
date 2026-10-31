@@ -115,6 +115,7 @@ Ou tudo de uma vez: `npm run qa`.
 | `npm run stories:check` | Não grava nada; falha se algum `.feature` estiver desatualizado (usado no CI) |
 | `npm run test:e2e` | Gera os testes do playwright-bdd e executa no Chromium |
 | `npm run test:unit` | Testes unitários do parser, normalização, IA (com cliente simulado) e Xray |
+| `npm run test:agent` | Autotestes do agente contra um formulário local com defeitos plantados (sem internet) |
 | `npm run typecheck` | Checagem de tipos |
 | `npm run xray:export` | Converte os resultados para o formato de importação do Xray (`-- --upload` envia) |
 
@@ -146,11 +147,30 @@ Para enviar de verdade, configure as variáveis abaixo e rode `npm run xray:expo
 | `XRAY_PROJECT_KEY` | Projeto onde os testes novos são criados (padrão `QA`) |
 | `XRAY_TEST_PLAN_KEY` | (opcional) Plano de teste da execução |
 
+## Quem testa o testador?
+
+Um agente de QA que nunca falha não prova nada. Por isso ele tem os próprios testes em [`tests/agent/`](tests/agent/agent-self-test.spec.ts), que rodam contra um [formulário local](tests/agent/lab/formulario-lab.html) com **defeitos plantados**, ligados pela URL. Para cada defeito, o teste exige que o agente acuse o problema com a mensagem certa:
+
+| Defeito plantado | O agente precisa dizer |
+| --- | --- |
+| Resumo mostra outro sobrenome | `Nome completo: esperado "Beatriz Ramos", obtido "Beatriz Silva"` |
+| Resumo perde um item de uma lista | `Hobbies: esperado "Esportes, Leitura", obtido "Esportes"` |
+| Resumo sem uma linha | `Endereço: ... obtido "(linha ausente)"` |
+| Dois defeitos ao mesmo tempo | `2 de 6 verificações falharam`: todos de uma vez, não só o primeiro |
+| Campo corta o último dígito | erro já no preenchimento, antes do envio |
+| Formulário válido que não envia | `nenhum campo foi marcado como inválido` |
+| Tela que aceita dado inválido | `a história esperava que fosse bloqueado` |
+| História com expectativa errada | `Nome: esperado "inválido", obtido "válido"` |
+
+O formulário também roda **sem defeito**, para garantir que o agente não acusa bug onde não há. Esses testes não dependem de internet.
+
+Eles já se pagaram: encontraram um **falso positivo no próprio agente**. A confirmação de envio era conferida pelo texto, mas não pela visibilidade. No DemoQA isso passava despercebido, porque a confirmação só é criada na página depois do envio. Num formulário que já deixa a confirmação escondida na página, o agente diria "enviado com sucesso" sem envio nenhum.
+
 ## CI (GitHub Actions)
 
 O workflow [`qa.yml`](.github/workflows/qa.yml) roda a cada push, PR e toda segunda-feira:
 
-1. checagem de tipos e testes unitários;
+1. checagem de tipos, testes unitários e autotestes do agente;
 2. `stories:check`, que garante que os `.feature` estão em sincronia com as histórias;
 3. execução dos cenários no Chromium;
 4. exportação para o Xray (e upload, se os secrets `XRAY_CLIENT_ID`/`XRAY_CLIENT_SECRET` existirem);
@@ -173,6 +193,7 @@ src/
   reporting/              Reporter do Playwright, relatório HTML e exportação Xray
   cli/                    Comandos compile-stories e xray-export
 tests/unit/               Testes unitários
+tests/agent/              Autotestes do agente (formulário local com defeitos plantados)
 ```
 
 ## Adicionando um novo formulário

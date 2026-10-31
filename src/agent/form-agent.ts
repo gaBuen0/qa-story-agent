@@ -28,8 +28,9 @@ export class FormAgent {
     return this.target;
   }
 
-  async open(targetId: string): Promise<void> {
-    this.target = getTarget(targetId);
+  /** Abre um formulário registrado (pelo id) ou um alvo passado direto, como nos autotestes do agente. */
+  async open(target: string | FormTarget): Promise<void> {
+    this.target = typeof target === 'string' ? getTarget(target) : target;
     this.log.target = this.target.id;
     const blocked = this.target.blockRequests;
     if (blocked) {

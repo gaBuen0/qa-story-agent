@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <title>Formulário de laboratório</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 520px; margin: 32px auto; padding: 0 16px; }
+    label { display: block; margin-top: 12px; }
+    fieldset { margin-top: 12px; }
+    fieldset label { display: inline; margin-right: 12px; }
+    #confirmacao { margin-top: 24px; border: 1px solid #999; padding: 12px; }
+    td { padding: 4px 8px; border-bottom: 1px solid #ddd; }
+  </style>
+</head>
+<body>
+  <!--
+    Formulário de laboratório para testar o próprio agente.
+    Sem defeito, ele se comporta como um formulário correto. Cada defeito, ligado pela URL
+    (#defeito=a,b), simula um tipo de bug que o agente precisa detectar.
+  -->
+  <h1>Matrícula (laboratório)</h1>
+  <form id="matricula">
+    <label>Nome <input id="nome" required></label>
+    <label>Sobrenome <input id="sobrenome" required></label>
+    <label>E-mail <input id="email" type="email"></label>
+
+    <fieldset id="genero">
+      <legend>Gênero</legend>
+      <input type="radio" name="genero" id="genero-m" value="Masculino" required><label for="genero-m">Masculino</label>
+      <input type="radio" name="genero" id="genero-f" value="Feminino"><label for="genero-f">Feminino</label>
+      <input type="radio" name="genero" id="genero-o" value="Outro"><label for="genero-o">Outro</label>
+    </fieldset>
+
+    <label>Celular <input id="celular" required pattern="[0-9]{10}" placeholder="10 dígitos"></label>
+
+    <fieldset id="hobbies">
+      <legend>Hobbies</legend>
+      <input type="checkbox" id="hobby-esportes"><label for="hobby-esportes">Esportes</label>
+      <input type="checkbox" id="hobby-leitura"><label for="hobby-leitura">Leitura</label>
+      <input type="checkbox" id="hobby-musica"><label for="hobby-musica">Música</label>
+    </fieldset>
+
+    <label>Endereço <textarea id="endereco"></textarea></label>
+
+    <p><button id="enviar" type="submit">Enviar</button></p>
+  </form>
+
+  <section id="confirmacao" hidden>
+    <h2 id="titulo-confirmacao">Matrícula recebida</h2>
+    <table><tbody id="resumo"></tbody></table>
+  </section>
+
+  <script>
+    const defeitos = new Set(
+      (new URLSearchParams(location.hash.slice(1)).get('defeito') || '').split(',').filter(Boolean),
+    );
+    const form = document.getElementById('matricula');
+    const $ = (id) => document.getElementById(id);
+    const marcados = (grupo) =>
+      [...$(grupo).querySelectorAll('input:checked')].map((i) => document.querySelector(`label[for="${i.id}"]`).textContent);
+
+    // Bug de entrada: o campo corta o último dígito do celular.
+    if (defeitos.has('celular-corta-digito')) {
+      $('celular').addEventListener('input', (e) => { e.target.value = e.target.value.slice(0, 9); });
+    }
+    // Bug de validação: a tela aceita qualquer dado.
+    if (defeitos.has('aceita-invalido')) form.noValidate = true;
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      // Bug de envio: com tudo válido, nada acontece.
+      if (defeitos.has('nao-envia')) return;
+
+      let sobrenome = $('sobrenome').value;
+      if (defeitos.has('resumo-sobrenome-trocado')) sobrenome = 'Silva';
+      let hobbies = marcados('hobbies');
+      if (defeitos.has('resumo-sem-hobby')) hobbies = hobbies.slice(0, -1);
+
+      const linhas = [
+        ['Nome completo', `${$('nome').value} ${sobrenome}`],
+        ['E-mail', $('email').value],
+        ['Gênero', marcados('genero')[0] || ''],
+        ['Celular', $('celular').value],
+        ['Hobbies', hobbies.join(', ')],
+      ];
+      if (!defeitos.has('resumo-sem-endereco')) linhas.push(['Endereço', $('endereco').value]);
+
+      $('resumo').replaceChildren(
+        ...linhas.map(([rotulo, valor]) => {
+          const tr = document.createElement('tr');
+          for (const texto of [rotulo, valor]) {
+            const td = document.createElement('td');
+            td.textContent = texto;
+            tr.append(td);
+          }
+          return tr;
+        }),
+      );
+      $('confirmacao').hidden = false;
+    });
+  </script>
+</body>
+</html>
