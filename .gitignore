@@ -8,3 +8,9 @@ playwright-report/
 
 # Notas pessoais de trabalho (ficam só na máquina local)
 ONDE-PARAMOS.txt
+
+# Arquivos temporários do workflow "História a partir de issue"
+issue-feedback.txt
+compile.log
+pr-body.md
+comment.md

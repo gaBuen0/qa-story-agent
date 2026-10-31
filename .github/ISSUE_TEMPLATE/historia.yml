@@ -1,0 +1,83 @@
+name: Nova história
+description: Uma história de usuário que vira cenários BDD e um Pull Request automaticamente.
+title: 'US-XXX · '
+labels: [historia]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Ao abrir esta issue, um workflow gera a história em `stories/`, o `.feature` e abre um **Pull Request** para revisão.
+        Se algo estiver errado, o problema é comentado aqui; editar a issue roda tudo de novo.
+        Use só dados fictícios (e-mails em `example.com`).
+
+  - type: input
+    id: id
+    attributes:
+      label: ID da história
+      placeholder: US-005
+    validations:
+      required: true
+
+  - type: dropdown
+    id: alvo
+    attributes:
+      label: Formulário-alvo
+      options:
+        - demoqa-practice-form
+        - demoqa-web-tables
+    validations:
+      required: true
+
+  - type: input
+    id: requisito
+    attributes:
+      label: Requisito (Xray)
+      description: Opcional. Chave do requisito no Jira; vira a tag @REQ_<chave>.
+      placeholder: QA-14
+
+  - type: input
+    id: tags
+    attributes:
+      label: Tags
+      description: Opcional, separadas por vírgula.
+      placeholder: cadastro, smoke
+
+  - type: textarea
+    id: narrativa
+    attributes:
+      label: Narrativa
+      value: |
+        **Como**
+        **Quero**
+        **Para**
+    validations:
+      required: true
+
+  - type: textarea
+    id: cenarios
+    attributes:
+      label: Cenários
+      description: Um bloco "## Cenário" por comportamento, com a tabela Campo | Valor e o resultado esperado (enviado ou bloqueado).
+      value: |
+        ## Cenário:
+
+        **Tags:** @smoke
+
+        | Campo | Valor |
+        | ----- | ----- |
+        | Nome  |       |
+
+        **Resultado esperado:** enviado
+
+        ## Cenário:
+
+        **Tags:** @negativo
+
+        | Campo | Valor |
+        | ----- | ----- |
+        | Nome  |       |
+
+        **Resultado esperado:** bloqueado
+        **Campos inválidos:**
+    validations:
+      required: true

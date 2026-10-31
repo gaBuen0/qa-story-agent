@@ -17,6 +17,7 @@
     "typecheck": "tsc",
     "lint": "biome check .",
     "format": "biome check --write .",
+    "story:from-issue": "tsx src/cli/issue-to-story.ts",
     "xray:export": "tsx src/cli/xray-export.ts",
     "qa": "npm run stories:compile && npm run test:e2e && npm run xray:export"
   },

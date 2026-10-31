@@ -1,0 +1,128 @@
+name: História a partir de issue
+
+# Issue do formulário "Nova história" → stories/<id>.md + .feature → Pull Request para revisão.
+on:
+  issues:
+    types: [opened, edited, labeled]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  actions: write
+
+concurrency:
+  group: historia-issue-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  historia:
+    name: Issue → história → Pull Request
+    # Num repositório público qualquer pessoa abre issue: só quem tem acesso ao repositório dispara o fluxo.
+    if: >-
+      github.event.issue.state == 'open' &&
+      contains(github.event.issue.labels.*.name, 'historia') &&
+      contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.issue.author_association)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+      ISSUE_NUMBER: ${{ github.event.issue.number }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Converter a issue em história
+        id: story
+        # O texto da issue entra só por variável de ambiente, nunca interpolado no comando.
+        env:
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_URL: ${{ github.event.issue.html_url }}
+        run: npm run --silent story:from-issue
+
+      - name: Gerar o .feature
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          set -o pipefail
+          npm run --silent stories:compile 2>&1 | tee compile.log
+
+      - name: Abrir ou atualizar o Pull Request
+        env:
+          STORY_ID: ${{ steps.story.outputs.id }}
+          STORY_FILE: ${{ steps.story.outputs.file }}
+        run: |
+          # A compilação já passou; daqui em diante, um erro não é da história.
+          rm -f compile.log
+          branch="historia/issue-${ISSUE_NUMBER}"
+          title=$(sed -n 's/^# //p' "$STORY_FILE" | head -n 1)
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git checkout -B "$branch"
+          git add stories features/generated
+          git commit -m "test(${STORY_ID}): história gerada a partir da issue #${ISSUE_NUMBER}" || echo 'Nada mudou na história.'
+          git push --force origin "$branch"
+
+          feature="features/generated/${STORY_ID}.feature"
+          {
+            echo "História **${STORY_ID}** gerada a partir da issue #${ISSUE_NUMBER}: [\`${STORY_FILE}\`](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/blob/${branch}/${STORY_FILE})."
+            echo
+            echo "Closes #${ISSUE_NUMBER}"
+            echo
+            echo '**Para revisar**'
+            echo '- [ ] Os cenários abaixo cobrem o que a issue pede'
+            echo '- [ ] Os checks **CI** e **E2E (DemoQA)** passaram'
+            echo
+            if [ -f "$feature" ]; then
+              echo '<details open><summary>Cenários gerados</summary>'
+              echo
+              echo '```gherkin'
+              cat "$feature"
+              echo '```'
+              echo '</details>'
+            else
+              echo '> O `.feature` não foi gerado (história em texto livre sem `ANTHROPIC_API_KEY` configurada).'
+            fi
+          } > pr-body.md
+
+          if gh pr view "$branch" --json state --jq .state 2>/dev/null | grep -q OPEN; then
+            gh pr edit "$branch" --title "$title" --body-file pr-body.md
+          else
+            gh pr create --base main --head "$branch" --title "$title" --body-file pr-body.md
+          fi
+          url=$(gh pr view "$branch" --json url --jq .url)
+
+          # PRs abertos com o token do Actions não disparam outros workflows sozinhos.
+          gh workflow run ci.yml --ref "$branch"
+          gh workflow run e2e-demoqa.yml --ref "$branch"
+
+          gh issue comment "$ISSUE_NUMBER" --body "✅ História **${STORY_ID}** gerada. Pull Request para revisão: ${url}
+          Os cenários estão rodando no CI e no DemoQA; o resultado aparece nos checks do PR."
+
+      - name: Avisar na issue o que precisa ser corrigido
+        if: failure()
+        run: |
+          {
+            echo '❌ Não consegui gerar a história a partir desta issue:'
+            echo
+            echo '```'
+            if [ -f issue-feedback.txt ]; then
+              cat issue-feedback.txt
+            elif [ -f compile.log ]; then
+              sed 's/\x1b\[[0-9;]*m//g' compile.log | grep -v '^\s*$' | tail -30
+            else
+              echo 'Erro inesperado; veja o log do workflow.'
+            fi
+            echo '```'
+            echo
+            echo 'Corrija a issue: ao salvar a edição, o fluxo roda de novo.'
+          } > comment.md
+          gh issue comment "$ISSUE_NUMBER" --body-file comment.md

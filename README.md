@@ -95,6 +95,29 @@ npm run stories:compile
 
 Sem chave configurada, as histórias em texto livre são puladas com um aviso e o restante funciona normalmente.
 
+### Do card ao teste: história aberta como issue
+
+A história também pode nascer como **issue**, do jeito que um card chega para o QA. O formulário [**Nova história**](.github/ISSUE_TEMPLATE/historia.yml) pede ID, formulário-alvo, requisito, narrativa e cenários. Ao salvar, o workflow [`historia-da-issue.yml`](.github/workflows/historia-da-issue.yml) faz o resto:
+
+```mermaid
+flowchart LR
+    I["📝 Issue<br/>Nova história"] --> S["stories/US-XXX.md"]
+    S --> F[".feature"]
+    F --> PR["🔀 Pull Request"]
+    PR --> C["✅ CI + E2E no DemoQA"]
+    C --> R["👀 Revisão e merge"]
+    I -. "erro na história" .-> E["💬 Comentário na issue<br/>com o que corrigir"]
+```
+
+- Se a história tem problema (ID repetido, campo que não existe, cenário sem resultado esperado), o workflow comenta na issue o que corrigir. Editar a issue roda tudo de novo e atualiza o mesmo PR.
+- O PR traz os cenários gerados na descrição e roda o CI e os cenários no DemoQA antes do merge. O merge fecha a issue.
+
+Como o repositório é público e qualquer pessoa pode abrir uma issue, o fluxo tem três proteções:
+
+- só roda para issues de quem tem acesso ao repositório (dono ou colaborador);
+- o texto da issue chega ao script só por variável de ambiente, nunca interpolado no comando, para evitar injeção de comandos;
+- tudo o que vai para o cabeçalho da história ou para o nome do arquivo é validado por formato ([testes](tests/unit/issue-form.test.ts) cobrem tentativas como `../../` e quebras de linha no ID).
+
 ## Rodando localmente
 
 Requisitos: Node.js 22+.
@@ -120,6 +143,7 @@ Ou tudo de uma vez: `npm run qa`.
 | `npm run typecheck` | Checagem de tipos |
 | `npm run lint` / `npm run format` | Lint e formatação com [Biome](https://biomejs.dev) (o `format` corrige o que der) |
 | `npm run xray:export` | Converte os resultados para o formato de importação do Xray (`-- --upload` envia) |
+| `npm run story:from-issue` | Converte a issue do evento em história (usado pelo workflow; lê `ISSUE_*` do ambiente) |
 
 ## Relatórios
 
@@ -203,7 +227,7 @@ src/
   agent/                  O agente: handlers por tipo de campo e de confirmação, preenchimento e validação
   steps/                  Passos BDD genéricos (valem para qualquer formulário)
   reporting/              Reporter do Playwright, relatório HTML e exportação Xray
-  cli/                    Comandos compile-stories e xray-export
+  cli/                    Comandos compile-stories, xray-export e issue-to-story
 tests/unit/               Testes unitários
 tests/agent/              Autotestes do agente (formulário local com defeitos plantados)
 ```
