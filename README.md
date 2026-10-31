@@ -1,6 +1,7 @@
 # QA Story Agent
 
-[![QA Story Agent](https://github.com/gaBuen0/qa-story-agent/actions/workflows/qa.yml/badge.svg)](https://github.com/gaBuen0/qa-story-agent/actions/workflows/qa.yml)
+[![CI](https://github.com/gaBuen0/qa-story-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/gaBuen0/qa-story-agent/actions/workflows/ci.yml)
+[![E2E (DemoQA)](https://github.com/gaBuen0/qa-story-agent/actions/workflows/e2e-demoqa.yml/badge.svg)](https://github.com/gaBuen0/qa-story-agent/actions/workflows/e2e-demoqa.yml)
 ![Playwright](https://img.shields.io/badge/Playwright-1.64-2EAD33?logo=playwright&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-7-3178C6?logo=typescript&logoColor=white)
 ![BDD](https://img.shields.io/badge/BDD-Gherkin%20pt--BR-23D96C?logo=cucumber&logoColor=white)
@@ -9,7 +10,7 @@ Um agente de QA que **lê uma história de usuário em Markdown**, transforma em
 
 > No trabalho, construí um agente de QA para automatizar um fluxo que eu fazia à mão: ler um requisito, preencher um formulário e conferir campo por campo se tudo foi gravado certo. Esse projeto é confidencial, então recriei a mesma ideia de forma aberta, com dados 100% fictícios e rodando num site público de prática ([DemoQA](https://demoqa.com/automation-practice-form)).
 
-**📊 [Ver o relatório da última execução](https://gabuen0.github.io/qa-story-agent/)**, publicado automaticamente pelo CI a cada push na `main`.
+**📊 [Ver o relatório da última execução](https://gabuen0.github.io/qa-story-agent/)**, publicado automaticamente a cada execução do E2E na `main`.
 
 ![Relatório gerado pelo agente](docs/relatorio.png)
 
@@ -168,14 +169,22 @@ Eles já se pagaram: encontraram um **falso positivo no próprio agente**. A con
 
 ## CI (GitHub Actions)
 
-O workflow [`qa.yml`](.github/workflows/qa.yml) roda a cada push, PR e toda segunda-feira:
+São dois workflows, separados de propósito. O DemoQA é um site público que às vezes fica instável, e uma queda dele não deveria deixar o repositório vermelho.
 
-1. checagem de tipos, testes unitários e autotestes do agente;
+**[`ci.yml`](.github/workflows/ci.yml)** roda em todo push e PR, sem depender de internet:
+
+1. checagem de tipos e testes unitários;
 2. `stories:check`, que garante que os `.feature` estão em sincronia com as histórias;
-3. execução dos cenários no Chromium;
-4. exportação para o Xray (e upload, se os secrets `XRAY_CLIENT_ID`/`XRAY_CLIENT_SECRET` existirem);
-5. relatórios publicados como artefato da execução;
-6. na `main`, o relatório do agente é publicado no [GitHub Pages](https://gabuen0.github.io/qa-story-agent/).
+3. autotestes do agente contra o formulário local com defeitos plantados.
+
+**[`e2e-demoqa.yml`](.github/workflows/e2e-demoqa.yml)** roda toda segunda-feira, sob demanda e quando mudam as histórias, as features ou o código do agente:
+
+1. execução dos cenários no DemoQA (Chromium);
+2. exportação para o Xray (e upload, se os secrets `XRAY_CLIENT_ID`/`XRAY_CLIENT_SECRET` existirem);
+3. relatórios publicados como artefato da execução;
+4. na `main`, o relatório do agente é publicado no [GitHub Pages](https://gabuen0.github.io/qa-story-agent/).
+
+Assim, um badge vermelho no E2E com o CI verde aponta direto para o site externo, e não para o código.
 
 Para ligar o Pages num fork, ative *Settings → Pages → Source: GitHub Actions* e crie a variável de repositório `PUBLISH_REPORT=true`.
 

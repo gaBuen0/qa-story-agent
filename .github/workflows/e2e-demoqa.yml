@@ -1,16 +1,35 @@
-name: QA Story Agent
+name: E2E (DemoQA)
 
+# Cenários contra o DemoQA, um site público que às vezes fica instável.
+# Por isso ficam fora do CI de todo push: rodam toda segunda, sob demanda
+# e quando mudam as histórias ou o código do agente.
 on:
+  schedule:
+    # Toda segunda às 9h (UTC), para detectar mudanças no site de prática.
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
   push:
     branches: [main]
+    paths:
+      - 'stories/**'
+      - 'features/**'
+      - 'src/**'
+      - 'fixtures/**'
+      - 'playwright.config.ts'
+      - 'package-lock.json'
+      - '.github/workflows/e2e-demoqa.yml'
   pull_request:
-  workflow_dispatch:
-  schedule:
-    # Roda toda segunda às 9h (UTC) para detectar mudanças no site de prática.
-    - cron: '0 9 * * 1'
+    paths:
+      - 'stories/**'
+      - 'features/**'
+      - 'src/**'
+      - 'fixtures/**'
+      - 'playwright.config.ts'
+      - 'package-lock.json'
+      - '.github/workflows/e2e-demoqa.yml'
 
 concurrency:
-  group: qa-${{ github.ref }}
+  group: e2e-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -37,18 +56,6 @@ jobs:
 
       - name: Instalar Chromium
         run: npx playwright install --with-deps chromium
-
-      - name: Checar tipos
-        run: npm run typecheck
-
-      - name: Testes unitários
-        run: npm run test:unit
-
-      - name: Autotestes do agente (defeitos plantados)
-        run: npm run test:agent
-
-      - name: Features em sincronia com as histórias
-        run: npm run stories:check
 
       - name: Executar cenários no navegador
         run: npm run test:e2e
