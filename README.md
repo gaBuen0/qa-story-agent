@@ -9,6 +9,8 @@ Um agente de QA que **lê uma história de usuário em Markdown**, transforma em
 
 > No trabalho, construí um agente de QA para automatizar um fluxo que eu fazia à mão: ler um requisito, preencher um formulário e conferir campo por campo se tudo foi gravado certo. Esse projeto é confidencial, então recriei a mesma ideia de forma aberta, com dados 100% fictícios e rodando num site público de prática ([DemoQA](https://demoqa.com/automation-practice-form)).
 
+**📊 [Ver o relatório da última execução](https://gabuen0.github.io/qa-story-agent/)**, publicado automaticamente pelo CI a cada push na `main`.
+
 ![Relatório gerado pelo agente](docs/relatorio.png)
 
 ## Como funciona
@@ -152,9 +154,10 @@ O workflow [`qa.yml`](.github/workflows/qa.yml) roda a cada push, PR e toda segu
 2. `stories:check`, que garante que os `.feature` estão em sincronia com as histórias;
 3. execução dos cenários no Chromium;
 4. exportação para o Xray (e upload, se os secrets `XRAY_CLIENT_ID`/`XRAY_CLIENT_SECRET` existirem);
-5. relatórios publicados como artefato da execução.
+5. relatórios publicados como artefato da execução;
+6. na `main`, o relatório do agente é publicado no [GitHub Pages](https://gabuen0.github.io/qa-story-agent/).
 
-Para publicar o relatório no **GitHub Pages** a cada push na `main`, ative *Settings → Pages → Source: GitHub Actions* e crie a variável de repositório `PUBLISH_REPORT=true`.
+Para ligar o Pages num fork, ative *Settings → Pages → Source: GitHub Actions* e crie a variável de repositório `PUBLISH_REPORT=true`.
 
 ## Estrutura
 
