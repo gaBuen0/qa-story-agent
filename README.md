@@ -115,7 +115,7 @@ Ou tudo de uma vez: `npm run qa`.
 | `npm run stories:compile` | Gera/atualiza os `.feature` (use `-- --no-llm` para não chamar a IA) |
 | `npm run stories:check` | Não grava nada; falha se algum `.feature` estiver desatualizado (usado no CI) |
 | `npm run test:e2e` | Gera os testes do playwright-bdd e executa no Chromium |
-| `npm run test:unit` | Testes unitários do parser, normalização, IA (com cliente simulado) e Xray |
+| `npm run test:unit` | Testes unitários do parser, normalização, IA (com cliente simulado) e Xray (com API simulada) |
 | `npm run test:agent` | Autotestes do agente contra um formulário local com defeitos plantados (sem internet) |
 | `npm run typecheck` | Checagem de tipos |
 | `npm run lint` / `npm run format` | Lint e formatação com [Biome](https://biomejs.dev) (o `format` corrige o que der) |
@@ -148,6 +148,8 @@ Para enviar de verdade, configure as variáveis abaixo e rode `npm run xray:expo
 | `XRAY_CLIENT_ID`, `XRAY_CLIENT_SECRET` | Credenciais da API do Xray Cloud |
 | `XRAY_PROJECT_KEY` | Projeto onde os testes novos são criados (padrão `QA`) |
 | `XRAY_TEST_PLAN_KEY` | (opcional) Plano de teste da execução |
+
+O envio é testado contra um [servidor local que imita a API do Xray Cloud](tests/unit/xray-upload.test.ts): autenticação, token, importação, os erros de credencial e de payload, e o comando `xray:export -- --upload` de ponta a ponta. Ele ainda não foi exercitado contra uma instância real do Jira.
 
 ## Quem testa o testador?
 
