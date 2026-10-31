@@ -70,7 +70,10 @@ export class FormAgent {
 
   async expectSubmitted(): Promise<void> {
     try {
-      await expect(this.page.locator(this.form.success.selector)).toHaveText(this.form.success.text);
+      // Visível, não só presente: há telas que já trazem a confirmação escondida na página.
+      const success = this.page.locator(this.form.success.selector);
+      await expect(success).toBeVisible();
+      await expect(success).toHaveText(this.form.success.text);
     } catch {
       // Não basta dizer "não enviou": o agente investiga quais campos a tela recusou.
       const invalid: string[] = [];
