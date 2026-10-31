@@ -5,3 +5,6 @@ test-results/
 playwright-report/
 .env
 *.log
+
+# Notas pessoais de trabalho (ficam só na máquina local)
+ONDE-PARAMOS.txt
