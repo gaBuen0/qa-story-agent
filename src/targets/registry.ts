@@ -1,9 +1,10 @@
 import { demoqaPracticeForm } from './demoqa-practice-form';
+import { demoqaWebTables } from './demoqa-web-tables';
 import type { FormTarget } from './types';
 
-const TARGETS: Record<string, FormTarget> = {
-  [demoqaPracticeForm.id]: demoqaPracticeForm,
-};
+const TARGETS: Record<string, FormTarget> = Object.fromEntries(
+  [demoqaPracticeForm, demoqaWebTables].map((target) => [target.id, target]),
+);
 
 export function getTarget(id: string): FormTarget {
   const target = TARGETS[id];

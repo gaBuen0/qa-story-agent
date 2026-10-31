@@ -163,7 +163,7 @@ Um agente de QA que nunca falha não prova nada. Por isso ele tem os próprios t
 | Tela que aceita dado inválido | `a história esperava que fosse bloqueado` |
 | História com expectativa errada | `Nome: esperado "inválido", obtido "válido"` |
 
-O formulário também roda **sem defeito**, para garantir que o agente não acusa bug onde não há. Esses testes não dependem de internet.
+O formulário também roda **sem defeito**, para garantir que o agente não acusa bug onde não há. E roda nos dois formatos de confirmação: resumo e linha nova numa tabela que já tem outro registro, para provar que o agente confere a linha certa. Esses testes não dependem de internet.
 
 Eles já se pagaram: encontraram um **falso positivo no próprio agente**. A confirmação de envio era conferida pelo texto, mas não pela visibilidade. No DemoQA isso passava despercebido, porque a confirmação só é criada na página depois do envio. Num formulário que já deixa a confirmação escondida na página, o agente diria "enviado com sucesso" sem envio nenhum.
 
@@ -197,7 +197,7 @@ fixtures/files/           Arquivos usados em uploads
 src/
   story/                  Parser de Markdown, intérprete com IA, validação, gerador de Gherkin
   targets/                Definição declarativa de cada formulário + normalização de valores
-  agent/                  O agente: handlers por tipo de campo, preenchimento e validação
+  agent/                  O agente: handlers por tipo de campo e de confirmação, preenchimento e validação
   steps/                  Passos BDD genéricos (valem para qualquer formulário)
   reporting/              Reporter do Playwright, relatório HTML e exportação Xray
   cli/                    Comandos compile-stories e xray-export
@@ -205,16 +205,32 @@ tests/unit/               Testes unitários
 tests/agent/              Autotestes do agente (formulário local com defeitos plantados)
 ```
 
-## Adicionando um novo formulário
+## Dois formulários, os mesmos passos
 
-Tudo o que o agente sabe sobre uma tela fica num único arquivo declarativo, como [`src/targets/demoqa-practice-form.ts`](src/targets/demoqa-practice-form.ts):
+Tudo o que o agente sabe sobre uma tela fica num único arquivo declarativo. Hoje são dois formulários bem diferentes, testados com os mesmos passos BDD e o mesmo agente:
+
+| | [Cadastro de estudante](src/targets/demoqa-practice-form.ts) | [Cadastro de funcionário](src/targets/demoqa-web-tables.ts) |
+| --- | --- | --- |
+| História | [US-001](stories/US-001-cadastro-de-estudante.md), [US-002](stories/US-002-validacoes-do-cadastro.md), [US-003](stories/US-003-aluna-transferida.md) | [US-004](stories/US-004-cadastro-de-funcionario.md) |
+| Componentes | texto, radio, checkbox, calendário, autocomplete, select, upload | só campos de texto, dentro de uma janela |
+| Confirmação | janela com resumo rótulo → valor | **linha nova numa tabela** que já tem outros registros |
+
+Cada campo é uma linha de configuração:
 
 ```ts
 { key: 'gender', label: 'Gênero', kind: 'radio-group', selector: '#genterWrapper',
   options: [{ value: 'Female', aliases: ['Feminino', 'F'] }, ...] }
 ```
 
-Para testar outro formulário: crie um arquivo em `src/targets/`, registre em `registry.ts` e use o `id` dele no campo `alvo:` da história. Os passos BDD não mudam. Se a tela usar um componente que o agente ainda não conhece, basta escrever um handler (`fill` + `read`) em [`src/agent/field-handlers.ts`](src/agent/field-handlers.ts).
+E a confirmação também:
+
+```ts
+confirmation: { kind: 'table-row', tableSelector: 'table', keyColumn: 'Email' }
+```
+
+No modo tabela, o agente acha a linha nova pela coluna-chave e confere as demais colunas. Assim ele aponta qual coluna foi gravada errada, em vez de só dizer que "a linha não apareceu".
+
+Para testar outro formulário: crie um arquivo em `src/targets/`, registre em `registry.ts` e use o `id` dele no campo `alvo:` da história. Os passos BDD não mudam. Um componente novo pede um handler (`fill` + `read`) em [`src/agent/field-handlers.ts`](src/agent/field-handlers.ts). Um formato novo de confirmação pede um handler (`locate` + `read`) em [`src/agent/confirmations.ts`](src/agent/confirmations.ts).
 
 ## Decisões técnicas
 
@@ -227,7 +243,6 @@ Para testar outro formulário: crie um arquivo em `src/targets/`, registre em `r
 
 ## Próximos passos
 
-- [ ] Suporte a mais formulários (ex.: outros exercícios do DemoQA) para mostrar a reutilização dos passos
 - [ ] Modo exploratório: o agente descobre os campos da tela e sugere a definição do formulário
 - [ ] Execução em paralelo em múltiplos navegadores (Firefox/WebKit)
 
