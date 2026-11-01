@@ -221,7 +221,16 @@ There are two workflows, split on purpose. DemoQA is a public site that is somet
 
 So a red E2E badge with a green CI points straight at the external site, not at the code.
 
-To enable Pages in a fork, turn on *Settings → Pages → Source: GitHub Actions* and create the repository variable `PUBLISH_REPORT=true`.
+### Using it in a fork
+
+CI and E2E work with no setup. The extras need to be turned on in the repository:
+
+| To | Do |
+| --- | --- |
+| Publish the report to GitHub Pages | *Settings → Pages → Source: GitHub Actions* and the repository variable `PUBLISH_REPORT=true` |
+| Open stories as issues | Create the `historia` label and check *Settings → Actions → General → Allow GitHub Actions to create and approve pull requests* |
+| Free-text stories in the issue flow | The `ANTHROPIC_API_KEY` secret (stories with a table do not need it) |
+| Upload to Xray Cloud | The `XRAY_CLIENT_ID` and `XRAY_CLIENT_SECRET` secrets |
 
 ## Structure
 

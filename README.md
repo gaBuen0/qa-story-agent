@@ -217,7 +217,16 @@ São dois workflows, separados de propósito. O DemoQA é um site público que �
 
 Assim, um badge vermelho no E2E com o CI verde aponta direto para o site externo, e não para o código.
 
-Para ligar o Pages num fork, ative *Settings → Pages → Source: GitHub Actions* e crie a variável de repositório `PUBLISH_REPORT=true`.
+### Usando num fork
+
+O CI e o E2E funcionam sem configuração. Os extras precisam ser ligados no repositório:
+
+| Para | Faça |
+| --- | --- |
+| Publicar o relatório no GitHub Pages | *Settings → Pages → Source: GitHub Actions* e a variável de repositório `PUBLISH_REPORT=true` |
+| Abrir histórias como issue | Crie a etiqueta `historia` e marque *Settings → Actions → General → Allow GitHub Actions to create and approve pull requests* |
+| Histórias em texto livre no fluxo da issue | O secret `ANTHROPIC_API_KEY` (histórias com tabela não precisam) |
+| Enviar ao Xray Cloud | Os secrets `XRAY_CLIENT_ID` e `XRAY_CLIENT_SECRET` |
 
 ## Estrutura
 
