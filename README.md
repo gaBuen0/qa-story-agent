@@ -1,5 +1,7 @@
 # QA Story Agent
 
+**Português** · [English](README.en.md)
+
 [![CI](https://github.com/gaBuen0/qa-story-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/gaBuen0/qa-story-agent/actions/workflows/ci.yml)
 [![E2E (DemoQA)](https://github.com/gaBuen0/qa-story-agent/actions/workflows/e2e-demoqa.yml/badge.svg)](https://github.com/gaBuen0/qa-story-agent/actions/workflows/e2e-demoqa.yml)
 ![Playwright](https://img.shields.io/badge/Playwright-1.64-2EAD33?logo=playwright&logoColor=white)
@@ -111,6 +113,8 @@ flowchart LR
 
 - Se a história tem problema (ID repetido, campo que não existe, cenário sem resultado esperado), o workflow comenta na issue o que corrigir. Editar a issue roda tudo de novo e atualiza o mesmo PR.
 - O PR traz os cenários gerados na descrição e roda o CI e os cenários no DemoQA antes do merge. O merge fecha a issue.
+
+Exemplo ao vivo: a issue [#1](https://github.com/gaBuen0/qa-story-agent/issues/1) virou o Pull Request [#2](https://github.com/gaBuen0/qa-story-agent/pull/2), com os checks verdes.
 
 Como o repositório é público e qualquer pessoa pode abrir uma issue, o fluxo tem três proteções:
 
