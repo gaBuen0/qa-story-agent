@@ -57,7 +57,7 @@ body:
     id: cenarios
     attributes:
       label: Cenários
-      description: Um bloco "## Cenário" por comportamento, com a tabela Campo | Valor e o resultado esperado (enviado ou bloqueado).
+      description: Um bloco "## Cenário" por comportamento, com a tabela Campo | Valor e o resultado esperado (enviado ou bloqueado). Num cenário bloqueado, liste em "Campos inválidos" os campos que o formulário deve recusar.
       value: |
         ## Cenário:
 
