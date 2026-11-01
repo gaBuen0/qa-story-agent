@@ -94,7 +94,10 @@ async function main() {
       const rel = path.relative(process.cwd(), outputFile).replace(/\\/g, '/');
       const color = outcome === 'erro' ? c.err : outcome === 'pulado' || outcome === 'desatualizado' ? c.warn : c.ok;
       const where = outcome === 'pulado' ? '(não gerado)' : rel;
-      console.log(`  ${color(outcome.padEnd(13))} ${story.id.padEnd(8)} → ${where}  ${c.dim(detail.split('\n')[0]!)}`);
+      // No erro, os problemas vêm listados logo abaixo; a linha de resumo só diz quantos são.
+      const lines = detail.split('\n');
+      const summary = outcome === 'erro' ? `${lines.length} problema(s) na história:` : lines[0]!;
+      console.log(`  ${color(outcome.padEnd(13))} ${story.id.padEnd(8)} → ${where}  ${c.dim(summary)}`);
       if (outcome === 'erro') console.log(c.err(`    ${detail}`));
       if (outcome === 'erro' || (outcome === 'desatualizado' && checkOnly)) failures++;
     } catch (err) {
@@ -118,7 +121,7 @@ async function main() {
 
   console.log('');
   if (failures) {
-    console.error(c.err(`${failures} problema(s) encontrado(s).`));
+    console.error(c.err(`${failures} história(s) com problema.`));
     process.exit(1);
   }
 }
