@@ -137,11 +137,20 @@ npm run xray:export       # gera reports/xray-execution.json
 
 Ou tudo de uma vez: `npm run qa`.
 
+Para **ver o agente preenchendo o formulário**, rode com o navegador na tela, um cenário por vez e em câmera lenta:
+
+```bash
+npm run test:headed -- --grep "@US-004"   # só uma história; sem --grep roda todas
+```
+
+O atraso entre ações é de 300 ms. Para mudar, use a variável `SLOW_MO` (PowerShell: `$env:SLOW_MO=800`).
+
 | Comando | O que faz |
 | --- | --- |
 | `npm run stories:compile` | Gera/atualiza os `.feature` (use `-- --no-llm` para não chamar a IA) |
 | `npm run stories:check` | Não grava nada; falha se algum `.feature` estiver desatualizado (usado no CI) |
 | `npm run test:e2e` | Gera os testes do playwright-bdd e executa no Chromium |
+| `npm run test:headed` | O mesmo, com o navegador visível, um cenário por vez e em câmera lenta |
 | `npm run test:unit` | Testes unitários do parser, normalização, IA (com cliente simulado) e Xray (com API simulada) |
 | `npm run test:agent` | Autotestes do agente contra um formulário local com defeitos plantados (sem internet) |
 | `npm run typecheck` | Checagem de tipos |

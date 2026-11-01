@@ -12,6 +12,7 @@
     "stories:compile": "tsx src/cli/compile-stories.ts",
     "stories:check": "tsx src/cli/compile-stories.ts --check",
     "test:e2e": "bddgen && playwright test",
+    "test:headed": "bddgen && playwright test",
     "test:unit": "tsx --test \"tests/unit/**/*.test.ts\"",
     "test:agent": "playwright test -c playwright.agent.config.ts",
     "typecheck": "tsc",
