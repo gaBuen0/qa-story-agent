@@ -37,14 +37,26 @@ jobs:
     name: Histórias → BDD → Playwright
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    permissions:
+      contents: read
+      statuses: write
     env:
       XRAY_CLIENT_ID: ${{ secrets.XRAY_CLIENT_ID }}
       XRAY_CLIENT_SECRET: ${{ secrets.XRAY_CLIENT_SECRET }}
       XRAY_PROJECT_KEY: ${{ vars.XRAY_PROJECT_KEY }}
       XRAY_TEST_PLAN_KEY: ${{ vars.XRAY_TEST_PLAN_KEY }}
       XRAY_ENVIRONMENT: github-actions
+      # Disparado pelo fluxo da issue: o resultado volta ao Pull Request como status do commit.
+      PR_STATUS: ${{ github.event_name == 'workflow_dispatch' && startsWith(github.ref_name, 'historia/') }}
     steps:
       - uses: actions/checkout@v7
+
+      - name: Status no Pull Request (rodando)
+        if: ${{ env.PR_STATUS == 'true' }}
+        uses: ./.github/actions/commit-status
+        with:
+          context: E2E (DemoQA)
+          state: pending
 
       - uses: actions/setup-node@v7
         with:
@@ -90,6 +102,13 @@ jobs:
         uses: actions/upload-pages-artifact@v5
         with:
           path: site
+
+      - name: Status no Pull Request (resultado)
+        if: ${{ always() && env.PR_STATUS == 'true' }}
+        uses: ./.github/actions/commit-status
+        with:
+          context: E2E (DemoQA)
+          state: ${{ job.status }}
 
   pages:
     name: Publicar relatório

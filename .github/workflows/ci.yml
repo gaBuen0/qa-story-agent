@@ -16,8 +16,21 @@ jobs:
     name: Lint, tipos, unitários e autotestes do agente
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      contents: read
+      statuses: write
+    env:
+      # Disparado pelo fluxo da issue: o resultado volta ao Pull Request como status do commit.
+      PR_STATUS: ${{ github.event_name == 'workflow_dispatch' && startsWith(github.ref_name, 'historia/') }}
     steps:
       - uses: actions/checkout@v7
+
+      - name: Status no Pull Request (rodando)
+        if: ${{ env.PR_STATUS == 'true' }}
+        uses: ./.github/actions/commit-status
+        with:
+          context: CI
+          state: pending
 
       - uses: actions/setup-node@v7
         with:
@@ -54,3 +67,10 @@ jobs:
             reports/agent-self-test/
             test-results/
           retention-days: 7
+
+      - name: Status no Pull Request (resultado)
+        if: ${{ always() && env.PR_STATUS == 'true' }}
+        uses: ./.github/actions/commit-status
+        with:
+          context: CI
+          state: ${{ job.status }}
